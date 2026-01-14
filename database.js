@@ -5,7 +5,7 @@ class DatabaseManager {
         this.sequences = new Map();
         this.indexes = new Map();
         this.dbName = 'OracleSimDB';
-        this.dbVersion = 1;
+        this.dbVersion = 2; // Incremented to recreate database with all stores
         this.db = null;
         this.initSystemTables();
     }
@@ -164,35 +164,40 @@ class DatabaseManager {
         if (!this.db) return;
 
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['tables', 'sequences', 'metadata'], 'readwrite');
-            const tablesStore = transaction.objectStore('tables');
-            const sequencesStore = transaction.objectStore('sequences');
-            const metadataStore = transaction.objectStore('metadata');
+            try {
+                const transaction = this.db.transaction(['tables', 'sequences', 'metadata'], 'readwrite');
+                const tablesStore = transaction.objectStore('tables');
+                const sequencesStore = transaction.objectStore('sequences');
+                const metadataStore = transaction.objectStore('metadata');
 
-            // Clear existing data
-            tablesStore.clear();
-            sequencesStore.clear();
+                // Clear existing data
+                tablesStore.clear();
+                sequencesStore.clear();
 
-            // Save tables (exclude system tables from persistence)
-            for (const [name, data] of this.tables) {
-                if (!data.isSystemTable) {
-                    tablesStore.put({ name, data });
+                // Save tables (exclude system tables from persistence)
+                for (const [name, data] of this.tables) {
+                    if (!data.isSystemTable) {
+                        tablesStore.put({ name, data });
+                    }
                 }
+
+                // Save sequences
+                for (const [name, data] of this.sequences) {
+                    sequencesStore.put({ name, data });
+                }
+
+                // Save metadata
+                metadataStore.put({
+                    key: 'lastSaved',
+                    value: new Date().toISOString()
+                });
+
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            } catch (error) {
+                console.error('IndexedDB save error:', error);
+                resolve(); // Don't fail if IndexedDB has issues
             }
-
-            // Save sequences
-            for (const [name, data] of this.sequences) {
-                sequencesStore.put({ name, data });
-            }
-
-            // Save metadata
-            metadataStore.put({
-                key: 'lastSaved',
-                value: new Date().toISOString()
-            });
-
-            transaction.oncomplete = () => resolve();
-            transaction.onerror = () => reject(transaction.error);
         });
     }
 
