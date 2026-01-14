@@ -1,0 +1,512 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-terminal: #0c0c0c;
+    --text-primary: #00ff00;
+    --text-secondary: #cccccc;
+    --text-error: #ff4444;
+    --text-warning: #ffaa00;
+    --text-info: #4444ff;
+    --border-color: #3e3e42;
+    --highlight-bg: #2a2d2e;
+    --oracle-red: #c74634;
+    --oracle-gray: #7c7c7c;
+}
+
+body {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header */
+.header {
+    background: var(--bg-secondary);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--oracle-red);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    color: var(--oracle-red);
+    font-weight: bold;
+    font-size: 20px;
+    letter-spacing: 2px;
+}
+
+.version {
+    color: var(--oracle-gray);
+    font-size: 12px;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    background: var(--bg-terminal);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    background: var(--highlight-bg);
+    border-color: var(--oracle-red);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Terminal Container */
+.terminal-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-terminal);
+    padding: 20px;
+    overflow: hidden;
+}
+
+.terminal-output {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Scrollbar */
+.terminal-output::-webkit-scrollbar {
+    width: 10px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+    background: var(--bg-terminal);
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+}
+
+.terminal-output::-webkit-scrollbar-thumb:hover {
+    background: var(--oracle-gray);
+}
+
+/* Welcome Message */
+.welcome-message {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.welcome-message pre {
+    font-family: inherit;
+}
+
+/* Command Output */
+.command-block {
+    margin-bottom: 20px;
+}
+
+.command-echo {
+    color: #888;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.command-prompt {
+    color: var(--text-primary);
+    margin-right: 5px;
+}
+
+.command-text {
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.command-result {
+    color: var(--text-secondary);
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/* Table Styling */
+.sql-table {
+    margin: 10px 0;
+    color: var(--text-secondary);
+}
+
+.sql-table table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+}
+
+.sql-table th {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+    font-weight: bold;
+}
+
+.sql-table td {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+}
+
+.sql-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.sql-table tr:hover {
+    background: var(--highlight-bg);
+}
+
+/* Messages */
+.error-message {
+    color: var(--text-error);
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid var(--text-error);
+    background: rgba(255, 68, 68, 0.1);
+}
+
+.success-message {
+    color: var(--text-primary);
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid var(--text-primary);
+    background: rgba(0, 255, 0, 0.05);
+}
+
+.info-message {
+    color: var(--text-info);
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid var(--text-info);
+    background: rgba(68, 68, 255, 0.1);
+}
+
+.warning-message {
+    color: var(--text-warning);
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 3px solid var(--text-warning);
+    background: rgba(255, 170, 0, 0.1);
+}
+
+/* Input Line */
+.input-line {
+    display: flex;
+    align-items: flex-start;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+}
+
+.prompt {
+    color: var(--text-primary);
+    font-weight: bold;
+    margin-right: 5px;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+.input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.terminal-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    resize: none;
+    overflow-y: hidden;
+    line-height: 1.6;
+    min-height: 24px;
+    max-height: 300px;
+}
+
+.terminal-input::placeholder {
+    color: var(--oracle-gray);
+}
+
+/* Suggestions */
+.suggestions {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 5px;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.suggestions.show {
+    display: block;
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background: var(--highlight-bg);
+    color: var(--text-primary);
+}
+
+.suggestion-text {
+    font-weight: bold;
+}
+
+.suggestion-type {
+    font-size: 11px;
+    color: var(--oracle-gray);
+    text-transform: uppercase;
+}
+
+/* Tutorial Panel */
+.tutorial-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    background: var(--bg-secondary);
+    border: 2px solid var(--oracle-red);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+}
+
+.tutorial-panel.hidden {
+    display: none;
+}
+
+.tutorial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-terminal);
+}
+
+.tutorial-header h2 {
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.close-btn:hover {
+    background: var(--highlight-bg);
+    color: var(--text-error);
+}
+
+.tutorial-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.tutorial-text {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    line-height: 1.8;
+}
+
+.tutorial-text h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.tutorial-text p {
+    margin-bottom: 12px;
+}
+
+.tutorial-text code {
+    background: var(--bg-terminal);
+    color: var(--text-primary);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: inherit;
+}
+
+.tutorial-text pre {
+    background: var(--bg-terminal);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+    overflow-x: auto;
+    border-left: 3px solid var(--oracle-red);
+}
+
+.tutorial-text .example {
+    background: rgba(0, 255, 0, 0.05);
+    padding: 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+    border-left: 3px solid var(--text-primary);
+}
+
+.tutorial-text .note {
+    background: rgba(255, 170, 0, 0.1);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 15px 0;
+    border-left: 3px solid var(--text-warning);
+    color: var(--text-warning);
+}
+
+.tutorial-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-terminal);
+}
+
+.lesson-indicator {
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+/* Status Bar */
+.status-bar {
+    background: var(--bg-secondary);
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+}
+
+.status-left,
+.status-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.separator {
+    color: var(--border-color);
+}
+
+#statusText {
+    color: var(--text-primary);
+}
+
+#dbStatus {
+    color: var(--text-primary);
+}
+
+#rowCount {
+    color: var(--text-warning);
+}
+
+#execTime {
+    color: var(--oracle-gray);
+}
+
+/* Animations */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.cursor-blink::after {
+    content: '▋';
+    animation: blink 1s infinite;
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .tutorial-panel {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .status-bar {
+        flex-direction: column;
+        gap: 5px;
+        align-items: flex-start;
+    }
+}

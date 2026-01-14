@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oracle SQL Terminal Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <span class="logo">Oracle</span>
+                <span class="version">Database 21c Express Edition</span>
+            </div>
+            <div class="header-right">
+                <button id="tutorialBtn" class="btn">📚 Tutorial</button>
+                <button id="clearBtn" class="btn">🗑️ Clear</button>
+                <button id="resetDbBtn" class="btn">🔄 Reset DB</button>
+            </div>
+        </div>
+
+        <!-- Terminal Output Area -->
+        <div class="terminal-container">
+            <div id="terminalOutput" class="terminal-output">
+                <div class="welcome-message">
+                    <pre>
+╔═══════════════════════════════════════════════════════════════════╗
+║         Oracle Database 21c Express Edition Terminal              ║
+║                    SQL Simulator v1.0                             ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+Connected to:
+Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
+Version 21.3.0.0.0
+
+Type 'HELP' for help, 'TUTORIAL' to start the tutorial.
+Type 'DESC table_name' to describe a table structure.
+Type 'SELECT * FROM ALL_TABLES;' to list all tables.
+
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Input Line -->
+            <div class="input-line">
+                <span class="prompt">SQL&gt; </span>
+                <div class="input-wrapper">
+                    <textarea
+                        id="terminalInput"
+                        class="terminal-input"
+                        rows="1"
+                        placeholder="Enter SQL command..."
+                        spellcheck="false"
+                    ></textarea>
+                    <div id="suggestions" class="suggestions"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Panel -->
+        <div id="tutorialPanel" class="tutorial-panel hidden">
+            <div class="tutorial-header">
+                <h2>📚 Oracle SQL Tutorial</h2>
+                <button id="closeTutorialBtn" class="close-btn">✕</button>
+            </div>
+            <div class="tutorial-content">
+                <div id="tutorialText" class="tutorial-text"></div>
+                <div class="tutorial-controls">
+                    <button id="prevLessonBtn" class="btn" disabled>← Previous</button>
+                    <span id="lessonIndicator" class="lesson-indicator">Lesson 1 of 10</span>
+                    <button id="nextLessonBtn" class="btn">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="statusText">Ready</span>
+                <span class="separator">|</span>
+                <span id="dbStatus">DB: Connected</span>
+            </div>
+            <div class="status-right">
+                <span id="rowCount">0 rows</span>
+                <span class="separator">|</span>
+                <span id="execTime">0.00s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="database.js"></script>
+    <script src="sql-parser.js"></script>
+    <script src="sql-engine.js"></script>
+    <script src="data-seed.js"></script>
+    <script src="tutorial.js"></script>
+    <script src="terminal.js"></script>
+</body>
+</html>
