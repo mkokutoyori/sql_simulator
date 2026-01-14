@@ -3,92 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oracle SQL Terminal Simulator</title>
+    <title>Oracle SQL Client Simulator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <span class="logo">Oracle</span>
-                <span class="version">Database 21c Express Edition</span>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">🗄️</span>
+                <span class="logo-text">Oracle SQL Client</span>
             </div>
-            <div class="header-right">
-                <button id="tutorialBtn" class="btn">📚 Tutorial</button>
-                <button id="clearBtn" class="btn">🗑️ Clear</button>
-                <button id="resetDbBtn" class="btn">🔄 Reset DB</button>
+            <span class="version">Database 21c Express Edition</span>
+        </div>
+        <div class="header-center">
+            <div class="connection-status">
+                <span class="status-dot connected"></span>
+                <span id="connectionText">Connected to OracleSimDB</span>
             </div>
         </div>
+        <div class="header-right">
+            <button id="tutorialBtn" class="header-btn" title="Open Tutorial">
+                <span class="icon">📚</span>
+                <span class="text">Tutorial</span>
+            </button>
+            <button id="resetDbBtn" class="header-btn" title="Reset Database">
+                <span class="icon">🔄</span>
+                <span class="text">Reset DB</span>
+            </button>
+        </div>
+    </header>
 
-        <!-- Terminal Output Area -->
-        <div class="terminal-container">
-            <div id="terminalOutput" class="terminal-output">
-                <div class="welcome-message">
-                    <pre>
-╔═══════════════════════════════════════════════════════════════════╗
-║         Oracle Database 21c Express Edition Terminal              ║
-║                    SQL Simulator v1.0                             ║
-╚═══════════════════════════════════════════════════════════════════╝
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar - Database Explorer -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Database Explorer</h3>
+                <button id="refreshDbBtn" class="icon-btn" title="Refresh">🔄</button>
+            </div>
 
-Connected to:
-Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
-Version 21.3.0.0.0
+            <div class="sidebar-content">
+                <!-- Tables Section -->
+                <div class="explorer-section">
+                    <div class="section-header" data-section="tables">
+                        <span class="collapse-icon">▼</span>
+                        <span class="section-icon">📋</span>
+                        <span class="section-title">Tables</span>
+                        <span id="tablesCount" class="count-badge">0</span>
+                    </div>
+                    <div id="tablesList" class="section-content">
+                        <!-- Tables will be dynamically added here -->
+                    </div>
+                </div>
 
-Type 'HELP' for help, 'TUTORIAL' to start the tutorial.
-Type 'DESC table_name' to describe a table structure.
-Type 'SELECT * FROM ALL_TABLES;' to list all tables.
+                <!-- Sequences Section -->
+                <div class="explorer-section">
+                    <div class="section-header" data-section="sequences">
+                        <span class="collapse-icon">▼</span>
+                        <span class="section-icon">🔢</span>
+                        <span class="section-title">Sequences</span>
+                        <span id="sequencesCount" class="count-badge">0</span>
+                    </div>
+                    <div id="sequencesList" class="section-content">
+                        <!-- Sequences will be dynamically added here -->
+                    </div>
+                </div>
 
-                    </pre>
+                <!-- System Tables Section -->
+                <div class="explorer-section">
+                    <div class="section-header" data-section="system">
+                        <span class="collapse-icon">▼</span>
+                        <span class="section-icon">⚙️</span>
+                        <span class="section-title">System Tables</span>
+                        <span class="count-badge">3</span>
+                    </div>
+                    <div id="systemTablesList" class="section-content">
+                        <div class="table-item system-table" data-table="ALL_TABLES">
+                            <span class="table-icon">📊</span>
+                            <span class="table-name">ALL_TABLES</span>
+                        </div>
+                        <div class="table-item system-table" data-table="ALL_TAB_COLS">
+                            <span class="table-icon">📊</span>
+                            <span class="table-name">ALL_TAB_COLS</span>
+                        </div>
+                        <div class="table-item system-table" data-table="USER_SEQUENCES">
+                            <span class="table-icon">📊</span>
+                            <span class="table-name">USER_SEQUENCES</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button id="executeBtn" class="toolbar-btn primary" title="Execute Query (F5)">
+                        <span class="icon">▶️</span>
+                        <span class="text">Execute</span>
+                    </button>
+                    <button id="executeSelectedBtn" class="toolbar-btn" title="Execute Selected (F9)">
+                        <span class="icon">▶️</span>
+                        <span class="text">Execute Selected</span>
+                    </button>
+                    <button id="explainBtn" class="toolbar-btn" title="Explain Plan">
+                        <span class="icon">📝</span>
+                        <span class="text">Explain</span>
+                    </button>
+                </div>
+                <div class="toolbar-divider"></div>
+                <div class="toolbar-group">
+                    <button id="clearEditorBtn" class="toolbar-btn" title="Clear Editor">
+                        <span class="icon">🗑️</span>
+                        <span class="text">Clear</span>
+                    </button>
+                    <button id="formatBtn" class="toolbar-btn" title="Format SQL">
+                        <span class="icon">✨</span>
+                        <span class="text">Format</span>
+                    </button>
+                    <button id="saveQueryBtn" class="toolbar-btn" title="Save Query">
+                        <span class="icon">💾</span>
+                        <span class="text">Save</span>
+                    </button>
+                </div>
+                <div class="toolbar-divider"></div>
+                <div class="toolbar-group">
+                    <button id="newQueryBtn" class="toolbar-btn" title="New Query Tab">
+                        <span class="icon">➕</span>
+                        <span class="text">New Query</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Input Line -->
-            <div class="input-line">
-                <span class="prompt">SQL&gt; </span>
-                <div class="input-wrapper">
+            <!-- Query Editor -->
+            <div class="editor-container">
+                <div class="editor-header">
+                    <div class="editor-tabs">
+                        <div class="editor-tab active" data-tab="query1">
+                            <span class="tab-title">Query 1</span>
+                            <button class="tab-close" title="Close">×</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-wrapper">
+                    <div class="line-numbers" id="lineNumbers"></div>
                     <textarea
-                        id="terminalInput"
-                        class="terminal-input"
-                        rows="1"
-                        placeholder="Enter SQL command..."
+                        id="queryEditor"
+                        class="query-editor"
+                        placeholder="-- Enter your SQL query here...&#10;SELECT * FROM CUSTOMERS;&#10;&#10;-- Use Ctrl+Enter or F5 to execute"
                         spellcheck="false"
                     ></textarea>
-                    <div id="suggestions" class="suggestions"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- Tutorial Panel -->
-        <div id="tutorialPanel" class="tutorial-panel hidden">
-            <div class="tutorial-header">
+            <!-- Results Panel -->
+            <div class="results-container">
+                <div class="results-header">
+                    <div class="results-tabs">
+                        <button class="results-tab active" data-result="results">
+                            <span class="icon">📊</span>
+                            <span>Results</span>
+                        </button>
+                        <button class="results-tab" data-result="messages">
+                            <span class="icon">💬</span>
+                            <span>Messages</span>
+                            <span id="messageCount" class="tab-badge">0</span>
+                        </button>
+                        <button class="results-tab" data-result="schema">
+                            <span class="icon">🏗️</span>
+                            <span>Schema</span>
+                        </button>
+                        <button class="results-tab" data-result="history">
+                            <span class="icon">📜</span>
+                            <span>History</span>
+                        </button>
+                    </div>
+                    <div class="results-actions">
+                        <button id="exportBtn" class="icon-btn" title="Export Results">📥</button>
+                        <button id="clearResultsBtn" class="icon-btn" title="Clear Results">🗑️</button>
+                    </div>
+                </div>
+
+                <div class="results-content">
+                    <!-- Results Tab -->
+                    <div id="resultsPanel" class="results-panel active">
+                        <div class="empty-state">
+                            <div class="empty-icon">📊</div>
+                            <p>No query results yet</p>
+                            <p class="empty-hint">Execute a query to see results here</p>
+                        </div>
+                    </div>
+
+                    <!-- Messages Tab -->
+                    <div id="messagesPanel" class="results-panel">
+                        <div class="messages-list"></div>
+                    </div>
+
+                    <!-- Schema Tab -->
+                    <div id="schemaPanel" class="results-panel">
+                        <div class="empty-state">
+                            <div class="empty-icon">🏗️</div>
+                            <p>No table selected</p>
+                            <p class="empty-hint">Click on a table in the explorer to view its schema</p>
+                        </div>
+                    </div>
+
+                    <!-- History Tab -->
+                    <div id="historyPanel" class="results-panel">
+                        <div class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
                 <h2>📚 Oracle SQL Tutorial</h2>
-                <button id="closeTutorialBtn" class="close-btn">✕</button>
+                <button id="closeTutorialBtn" class="close-btn">×</button>
             </div>
-            <div class="tutorial-content">
-                <div id="tutorialText" class="tutorial-text"></div>
-                <div class="tutorial-controls">
-                    <button id="prevLessonBtn" class="btn" disabled>← Previous</button>
-                    <span id="lessonIndicator" class="lesson-indicator">Lesson 1 of 10</span>
-                    <button id="nextLessonBtn" class="btn">Next →</button>
-                </div>
+            <div class="modal-body">
+                <div id="tutorialText" class="tutorial-content"></div>
             </div>
-        </div>
-
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-left">
-                <span id="statusText">Ready</span>
-                <span class="separator">|</span>
-                <span id="dbStatus">DB: Connected</span>
-            </div>
-            <div class="status-right">
-                <span id="rowCount">0 rows</span>
-                <span class="separator">|</span>
-                <span id="execTime">0.00s</span>
+            <div class="modal-footer">
+                <button id="prevLessonBtn" class="btn" disabled>← Previous</button>
+                <span id="lessonIndicator" class="lesson-indicator">Lesson 1 of 10</span>
+                <button id="nextLessonBtn" class="btn">Next →</button>
             </div>
         </div>
     </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <div class="status-left">
+            <span id="statusText" class="status-item">Ready</span>
+            <span class="status-separator">|</span>
+            <span id="rowCount" class="status-item">0 rows</span>
+            <span class="status-separator">|</span>
+            <span id="execTime" class="status-item">0.00s</span>
+        </div>
+        <div class="status-right">
+            <span id="cursorPos" class="status-item">Ln 1, Col 1</span>
+            <span class="status-separator">|</span>
+            <span id="dbSize" class="status-item">DB: 0 KB</span>
+        </div>
+    </footer>
 
     <!-- Scripts -->
     <script src="database.js"></script>

@@ -163,34 +163,34 @@ class DatabaseManager {
     async saveToIndexedDB() {
         if (!this.db) return;
 
-        const transaction = this.db.transaction(['tables', 'sequences', 'metadata'], 'readwrite');
-        const tablesStore = transaction.objectStore('tables');
-        const sequencesStore = transaction.objectStore('sequences');
-        const metadataStore = transaction.objectStore('metadata');
-
-        // Clear existing data
-        await tablesStore.clear();
-        await sequencesStore.clear();
-
-        // Save tables (exclude system tables from persistence)
-        for (const [name, data] of this.tables) {
-            if (!data.isSystemTable) {
-                await tablesStore.put({ name, data });
-            }
-        }
-
-        // Save sequences
-        for (const [name, data] of this.sequences) {
-            await sequencesStore.put({ name, data });
-        }
-
-        // Save metadata
-        await metadataStore.put({
-            key: 'lastSaved',
-            value: new Date().toISOString()
-        });
-
         return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['tables', 'sequences', 'metadata'], 'readwrite');
+            const tablesStore = transaction.objectStore('tables');
+            const sequencesStore = transaction.objectStore('sequences');
+            const metadataStore = transaction.objectStore('metadata');
+
+            // Clear existing data
+            tablesStore.clear();
+            sequencesStore.clear();
+
+            // Save tables (exclude system tables from persistence)
+            for (const [name, data] of this.tables) {
+                if (!data.isSystemTable) {
+                    tablesStore.put({ name, data });
+                }
+            }
+
+            // Save sequences
+            for (const [name, data] of this.sequences) {
+                sequencesStore.put({ name, data });
+            }
+
+            // Save metadata
+            metadataStore.put({
+                key: 'lastSaved',
+                value: new Date().toISOString()
+            });
+
             transaction.oncomplete = () => resolve();
             transaction.onerror = () => reject(transaction.error);
         });

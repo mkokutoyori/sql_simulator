@@ -36,31 +36,57 @@ class Terminal {
     }
 
     setupEventListeners() {
-        const input = document.getElementById('terminalInput');
-        const output = document.getElementById('terminalOutput');
-        const suggestionsEl = document.getElementById('suggestions');
+        const editor = document.getElementById('queryEditor');
+        if (!editor) return;
 
-        // Input event handlers
-        input.addEventListener('keydown', (e) => this.handleKeyDown(e));
-        input.addEventListener('input', () => this.handleInput());
+        // Query execution
+        const executeBtn = document.getElementById('executeBtn');
+        if (executeBtn) {
+            executeBtn.addEventListener('click', () => this.executeQuery());
+        }
 
-        // Button handlers
-        document.getElementById('clearBtn').addEventListener('click', () => this.clearTerminal());
-        document.getElementById('resetDbBtn').addEventListener('click', () => this.resetDatabase());
-        document.getElementById('tutorialBtn').addEventListener('click', () => this.showTutorial());
-        document.getElementById('closeTutorialBtn').addEventListener('click', () => this.hideTutorial());
-        document.getElementById('prevLessonBtn').addEventListener('click', () => this.previousLesson());
-        document.getElementById('nextLessonBtn').addEventListener('click', () => this.nextLesson());
-
-        // Auto-resize textarea
-        input.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
+        // Keyboard shortcuts
+        editor.addEventListener('keydown', (e) => {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'Enter')) {
+                e.preventDefault();
+                this.executeQuery();
+            }
         });
 
-        // Focus input on click
-        output.addEventListener('click', () => input.focus());
-        input.focus();
+        // Database explorer
+        const refreshBtn = document.getElementById('refreshDbBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.refreshDatabase());
+        }
+
+        // Buttons
+        const resetBtn = document.getElementById('resetDbBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetDatabase());
+        }
+
+        const tutorialBtn = document.getElementById('tutorialBtn');
+        if (tutorialBtn) {
+            tutorialBtn.addEventListener('click', () => this.showTutorial());
+        }
+
+        const closeBtn = document.getElementById('closeTutorialBtn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.hideTutorial());
+        }
+
+        const prevBtn = document.getElementById('prevLessonBtn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => this.previousLesson());
+        }
+
+        const nextBtn = document.getElementById('nextLessonBtn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => this.nextLesson());
+        }
+
+        // Populate database explorer
+        this.refreshDatabase();
     }
 
     handleKeyDown(e) {
@@ -477,12 +503,121 @@ class Terminal {
     }
 
     updateStatus(status, info, execTime) {
-        document.getElementById('statusText').textContent = status;
-        if (info) {
-            document.getElementById('rowCount').textContent = info;
+        const statusEl = document.getElementById('statusText');
+        if (statusEl) statusEl.textContent = status;
+
+        const rowCountEl = document.getElementById('rowCount');
+        if (info && rowCountEl) rowCountEl.textContent = info;
+
+        const execTimeEl = document.getElementById('execTime');
+        if (execTime && execTimeEl) execTimeEl.textContent = execTime + 's';
+    }
+
+    // New methods for SQL Client interface
+    async executeQuery() {
+        const editor = document.getElementById('queryEditor');
+        if (!editor) return;
+
+        const query = editor.value.trim();
+        if (!query) return;
+
+        const startTime = performance.now();
+
+        try {
+            const result = await engine.execute(query);
+            const endTime = performance.now();
+            const execTime = ((endTime - startTime) / 1000).toFixed(3);
+
+            this.displayResults(result);
+            this.updateStatus('Query executed', `${result.rowCount || 0} rows`, execTime);
+            this.refreshDatabase();
+        } catch (error) {
+            const endTime = performance.now();
+            const execTime = ((endTime - startTime) / 1000).toFixed(3);
+            this.displayError(error.message);
+            this.updateStatus('Error', '', execTime);
         }
-        if (execTime) {
-            document.getElementById('execTime').textContent = execTime + 's';
+    }
+
+    displayResults(result) {
+        const resultsPanel = document.getElementById('resultsPanel');
+        if (!resultsPanel) return;
+
+        if (result.rows && result.rows.length > 0) {
+            let html = '<table class="results-table"><thead><tr>';
+            result.columns.forEach(col => {
+                html += `<th>${this.escapeHtml(String(col))}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            result.rows.forEach(row => {
+                html += '<tr>';
+                result.columns.forEach(col => {
+                    let value = row[col];
+                    if (value === null || value === undefined) {
+                        value = 'NULL';
+                    } else if (value instanceof Date) {
+                        value = value.toISOString().split('T')[0];
+                    } else {
+                        value = String(value);
+                    }
+                    html += `<td>${this.escapeHtml(value)}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            resultsPanel.innerHTML = html;
+        } else if (result.message) {
+            resultsPanel.innerHTML = `<div class="empty-state"><p>${this.escapeHtml(result.message)}</p></div>`;
+        }
+    }
+
+    displayError(message) {
+        const resultsPanel = document.getElementById('resultsPanel');
+        if (resultsPanel) {
+            resultsPanel.innerHTML = `<div class="empty-state" style="color: var(--error);"><p>❌ ${this.escapeHtml(message)}</p></div>`;
+        }
+    }
+
+    refreshDatabase() {
+        const tablesList = document.getElementById('tablesList');
+        const tablesCount = document.getElementById('tablesCount');
+        const sequencesList = document.getElementById('sequencesList');
+        const sequencesCount = document.getElementById('sequencesCount');
+
+        if (tablesList && tablesCount) {
+            tablesList.innerHTML = '';
+            const userTables = Array.from(db.tables.keys()).filter(name =>
+                !db.tables.get(name).isSystemTable
+            );
+            tablesCount.textContent = userTables.length;
+
+            userTables.forEach(tableName => {
+                const item = document.createElement('div');
+                item.className = 'table-item';
+                item.innerHTML = `<span class="table-icon">📁</span><span class="table-name">${tableName}</span>`;
+                item.addEventListener('click', () => {
+                    const editor = document.getElementById('queryEditor');
+                    if (editor && !editor.value.trim()) {
+                        editor.value = `SELECT * FROM ${tableName};`;
+                    }
+                });
+                tablesList.appendChild(item);
+            });
+        }
+
+        if (sequencesList && sequencesCount) {
+            sequencesList.innerHTML = '';
+            const sequences = Array.from(db.sequences.keys());
+            sequencesCount.textContent = sequences.length;
+
+            sequences.forEach(seqName => {
+                const item = document.createElement('div');
+                item.className = 'sequence-item';
+                item.innerHTML = `<span class="sequence-icon">🔢</span><span class="sequence-name">${seqName}</span>`;
+                sequencesList.appendChild(item);
+            });
         }
     }
 }
